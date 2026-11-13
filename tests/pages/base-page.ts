@@ -4,7 +4,6 @@ import { expect, Locator, Page, test } from '@playwright/test'
 export abstract class BasePage {
   readonly page: Page
   readonly logoLink: Locator
-  readonly statusButton: Locator
   readonly languageSwitcher: Locator
   readonly languageEnButton: Locator
   readonly languageRuButton: Locator
@@ -17,7 +16,6 @@ export abstract class BasePage {
   protected constructor(page: Page) {
     this.page = page
     this.logoLink = page.getByTestId('mainPage-link')
-    this.statusButton = page.getByTestId('openStatusPopup-button')
     this.languageSwitcher = page.getByTestId('language-switcher')
     this.languageEnButton = page.getByTestId('language-en')
     this.languageRuButton = page.getByTestId('language-ru')
