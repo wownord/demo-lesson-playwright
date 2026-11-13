@@ -1,11 +1,12 @@
 import { expect, Locator, Page, test } from '@playwright/test'
-import { BasePage } from './base-page'
+import { AuthorizedPage } from './authorized-page'
 import { LoginPage } from './login-page'
+import { OrderFoundPage } from './order-found-page'
+import { OrderNotFoundPage } from './order-not-found-page'
 
 // "Create order" page: available only for a logged in user
-export class OrderPage extends BasePage {
+export class OrderPage extends AuthorizedPage {
   readonly title: Locator
-  readonly logoutButton: Locator
   readonly nameField: Locator
   readonly nameError: Locator
   readonly phoneField: Locator
@@ -19,7 +20,6 @@ export class OrderPage extends BasePage {
   constructor(page: Page) {
     super(page)
     this.title = page.getByRole('heading', { name: 'Create order' })
-    this.logoutButton = page.getByTestId('logout-button')
     this.nameField = page.getByTestId('username-input')
     this.nameError = page.getByTestId('username-input-error')
     this.phoneField = page.getByTestId('phone-input')
@@ -67,8 +67,30 @@ export class OrderPage extends BasePage {
     })
   }
 
+  async getTrackingCode(): Promise<string> {
+    const text = await this.successPopup.textContent()
+    const trackingCode = text?.match(/Tracking code: (\d+)/)?.[1]
+    if (!trackingCode) throw new Error(`Tracking code not found in popup: ${text}`)
+    return trackingCode
+  }
+
+  async closeSuccessPopup(): Promise<void> {
+    await this.clickElement(this.successPopupOkButton)
+    await expect(this.successPopupWrapper).not.toHaveClass(/popup_opened/)
+  }
+
+  async searchExistingOrder(orderId: number | string): Promise<OrderFoundPage> {
+    await this.searchOrder(orderId)
+    return new OrderFoundPage(this.page)
+  }
+
+  async searchNonExistingOrder(orderId: number | string): Promise<OrderNotFoundPage> {
+    await this.searchOrder(orderId)
+    return new OrderNotFoundPage(this.page)
+  }
+
   async logout(): Promise<LoginPage> {
-    await this.clickElement(this.logoutButton)
+    await this.clickLogout()
     return new LoginPage(this.page)
   }
 }

@@ -3,7 +3,8 @@ on:
   push:
     branches: [main, master]
   pull_request:
-    branches: [main, master]
+    # also run for PRs into feature branches (stacked homework PRs)
+    branches: [main, master, 'feature/**']
 jobs:
   test:
     timeout-minutes: 60
